@@ -1,4 +1,10 @@
-var emotes = [{code:"Kappa", art:"./art/Kappa.png", audio:"./sounds/hehe_boii.mp3"}];
+var emotes = [{code:"Kappa", art:"./art/Kappa.png", audio:"./sounds/hehe_boii.mp3"}, {code:"KKona", art:"./art/KKona.png", audio:"./sounds/MLG.mp3"}];
+
+var current_emote = "";
+var current_combo = 0;
+var current_users = [];
+var cooldown_active = false;
+
 
 
 /*
@@ -13,56 +19,68 @@ function play_audio(audio_file) {
 
 
 /*
+ * After a combo has been achieved, a cooldown is activated.
+ * While the cooldown is activated, no checking for combos.
+ */
+function start_cooldown() {
+    cooldown_active = true;
+    setTimeout(function() {
+	cooldown_active = false;
+    }, 10000);
+}
+
+
+/*
  * Displays the emote and plays audio.
  * After sound is played, emote gets removed from display.
  */
 function show_emote(emote) {
-    console.log(emote);
     $('#emote').attr('src', emote.art);
-    $('#emote').css('display', 'block');
+    $('#emote').fadeIn(500);
     play_audio(emote.audio);
     hide_emote();
+    start_cooldown();
 }
 
 
+/*
+ * Fades emote out of display after 5 seconds.
+ */
 function hide_emote() {
     setTimeout(function(){
-	$('#emote').css('display', 'none');
+	$('#emote').fadeOut(500);
     }, 5000);
 }
 
 
-/*
- * Quick check to see if there is an occurence of a specific emote in the message.
- */
-function emote_in_message(emote, message) {
-    if(message.indexOf(emote) != -1){ return true; }
-    else { return false; }
-}
+function update_combo(emote) {
+    if(current_emote === emote.code) {
 
-
-function count_target_emote(emote, message) {
-    var words = message.split(' ');
-    var emote_count = 0;
-
-    for(i = 0; i < words.length ; i++) {
-	if (words[i] === emote) {
-	    emote_count++;
-	}
+    }
+    else {
+	current_emote = emote.code;
+	current_combo = 1;
     }
 
-    return emote_count;
+    return;
 }
 
+
 /*
- * Finds and counts any emote
+ * Finds the first occurence of any target emote.
  */
 function contains_target_emote(message) {
-    for(i = 0; i < emotes.length ; i++) {
-	if (emote_in_message(emotes[i].code, message)) {
-	    show_emote(emotes[i]);
-	}
-    }
+    if(cooldown_active == true) { return; }
 
     var words = message.split(' ');
+
+    for(i = 0; i < words.length ; i++) {
+	for(j = 0; j < emotes.length ; j++) {
+	    if (emotes[j].code === words[i]) {
+		show_emote(emotes[j]);
+		update_combo(emotes[j]);
+		return;
+	    }
+	}
+    }
 }

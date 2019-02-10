@@ -13,11 +13,12 @@
 
     <script src="chatbot.js"></script>
     <script src="tools.js"></script>
+    <script src="settings.js"></script>
     <script>
       window.chatClient = new chatClient({
-          channel: '#doopian',
-          username: 'doopbot',
-          password: 'oauth:crhqx6ksfa32ix1c06ax7pdldxhpiv'
+          channel: channel,
+          username: bot_name,
+          password: password
       });
 
       window.chatClient.open();
