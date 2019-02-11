@@ -18,7 +18,7 @@ The emote-combo-display is a browser source addon for OBS that will show an emot
 * Start by adding a browser source to your scene in OBS.
 * Check off the option for "Local file" in the browser source proporties.
 * Make sure to set the Width and Height of the browser source to 125.
-* After that you can drag the browser wherever you want the face to on screen.
+* After that you can drag the browser wherever you want the face to display on screen.
 
 ### settings.js
 
