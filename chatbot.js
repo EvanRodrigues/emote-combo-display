@@ -1,7 +1,3 @@
-
-/*
- * chatClient object
- */
 var chatClient = function chatClient(options){
     this.username = options.username;
     this.password = options.password;
@@ -10,6 +6,7 @@ var chatClient = function chatClient(options){
     this.server = 'irc-ws.chat.twitch.tv';
     this.port = 443;
 }
+
 
 chatClient.prototype.open = function open(){
     this.webSocket = new WebSocket('wss://' + this.server + ':' + this.port + '/', 'irc');
@@ -20,17 +17,23 @@ chatClient.prototype.open = function open(){
     this.webSocket.onopen = this.onOpen.bind(this);
 };
 
+
 chatClient.prototype.onError = function onError(message){
     console.log('Error: ' + message);
 };
 
 
-/*message handler*/
+/*
+ * Simple message handler method.
+ * Takes the message and parses the data.
+ * If there is a chat message, we check if there is a target emote used in the message
+ */
 chatClient.prototype.onMessage = function onMessage(message){
     var socket = this.webSocket;
 
     if(message !== null){
 	var parsed = this.parseMessage(message.data);
+	var parsed_username = parsed.username;
 	var parsed_message = parsed.message;
 
 	if(parsed != null){
@@ -39,11 +42,12 @@ chatClient.prototype.onMessage = function onMessage(message){
 	    }
 
 	    if(parsed_message != null) {
-		contains_target_emote(parsed_message);
+		contains_target_emote(parsed_message, parsed_username);
 	    }
         }
     }
 };
+
 
 chatClient.prototype.onOpen = function onOpen(){
     var socket = this.webSocket;
@@ -59,9 +63,11 @@ chatClient.prototype.onOpen = function onOpen(){
 
 };
 
+
 chatClient.prototype.onClose = function onClose(){
     console.log('Disconnected from the chat server.');
 };
+
 
 chatClient.prototype.close = function close(){
     if(this.webSocket){
@@ -71,7 +77,10 @@ chatClient.prototype.close = function close(){
 
 
 
-
+/*
+ * Credit to twitchdev for this method.
+ * Parses the server response and separates the response into useful variables.
+ */
 chatClient.prototype.parseMessage = function parseMessage(rawMessage) {
     var parsedMessage = {
         message: null,

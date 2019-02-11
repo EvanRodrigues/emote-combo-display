@@ -1,10 +1,18 @@
-var emotes = [{code:"Kappa", art:"./art/Kappa.png", audio:"./sounds/hehe_boii.mp3"}, {code:"KKona", art:"./art/KKona.png", audio:"./sounds/MLG.mp3"}];
-
 var current_emote = "";
 var current_combo = 0;
 var current_users = [];
 var cooldown_active = false;
+var timer;
 
+
+/*
+ * Resets the combo to default values.
+ */
+function reset_combo() {
+    current_emote = "";
+    current_combo = 0;
+    current_users = [];
+}
 
 
 /*
@@ -13,7 +21,7 @@ var cooldown_active = false;
  */
 function play_audio(audio_file) {
     var audio = new Audio(audio_file);
-    audio.volume = 0.2;
+    audio.volume = 1;
     audio.play();
 }
 
@@ -26,7 +34,7 @@ function start_cooldown() {
     cooldown_active = true;
     setTimeout(function() {
 	cooldown_active = false;
-    }, 10000);
+    }, 180000);
 }
 
 
@@ -53,32 +61,58 @@ function hide_emote() {
 }
 
 
-function update_combo(emote) {
-    if(current_emote === emote.code) {
+/*
+ * Starts the timing window for the current emote to be combo'd.
+ */
+function start_timer() {
+    timer = setTimeout(function(){
+ 	console.log("timer stopped");
+	timer_started = false;
+	reset_combo();
+    }, 20000);
+}
 
+
+/*
+ * Updates the global variables that keep track of the emote combo.
+ */
+function update_combo(emote, username) {
+    console.log("update_combo");
+
+    if(current_emote === emote.code) { //Combo still going.
+	current_combo++;
+	current_users.push(username);
+
+	//Combo target hit! Show face, play audio, and then reset.
+	if(current_combo == 10) {
+	    show_emote(emote);
+	    reset_combo();
+	}
     }
-    else {
+    else { //New combo started
+	clearTimeout(timer);
 	current_emote = emote.code;
 	current_combo = 1;
+	current_users = [username];
+	start_timer();
     }
-
-    return;
 }
 
 
 /*
  * Finds the first occurence of any target emote.
  */
-function contains_target_emote(message) {
+function contains_target_emote(message, username) {
     if(cooldown_active == true) { return; }
 
     var words = message.split(' ');
-
     for(i = 0; i < words.length ; i++) {
 	for(j = 0; j < emotes.length ; j++) {
 	    if (emotes[j].code === words[i]) {
-		show_emote(emotes[j]);
-		update_combo(emotes[j]);
+		update_combo(emotes[j], username);
+		// if(current_users.indexOf(username) == -1) {
+		    // update_combo(emotes[j], username);
+		// }
 		return;
 	    }
 	}
