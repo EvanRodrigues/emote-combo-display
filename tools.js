@@ -109,10 +109,9 @@ function contains_target_emote(message, username) {
     for(i = 0; i < words.length ; i++) {
 	for(j = 0; j < emotes.length ; j++) {
 	    if (emotes[j].code === words[i]) {
-		update_combo(emotes[j], username);
-		// if(current_users.indexOf(username) == -1) {
-		    // update_combo(emotes[j], username);
-		// }
+		if(current_users.indexOf(username) == -1) {
+		    update_combo(emotes[j], username);
+		}
 		return;
 	    }
 	}
