@@ -1,17 +1,13 @@
-var current_emote = "";
-var current_combo = 0;
-var current_users = [];
 var cooldown_active = false;
-var timer;
 
 
 /*
  * Resets the combo to default values.
  */
-function reset_combo() {
-    current_emote = "";
-    current_combo = 0;
-    current_users = [];
+function reset_combo(emote) {
+    emote.combo = 0;
+    emote.users = [];
+    emote.timer = null;
 }
 
 
@@ -34,7 +30,7 @@ function start_cooldown() {
     cooldown_active = true;
     setTimeout(function() {
 	cooldown_active = false;
-    }, 180000);
+    }, 30000);
 }
 
 
@@ -64,12 +60,12 @@ function hide_emote() {
 /*
  * Starts the timing window for the current emote to be combo'd.
  */
-function start_timer() {
-    timer = setTimeout(function(){
- 	console.log("timer stopped");
+function start_timer(emote) {
+    return setTimeout(function(){
+ 	console.log(emote.code + " timer stopped");
 	timer_started = false;
-	reset_combo();
-    }, 20000);
+	reset_combo(emote);
+    }, 35000);
 }
 
 
@@ -77,25 +73,27 @@ function start_timer() {
  * Updates the global variables that keep track of the emote combo.
  */
 function update_combo(emote, username) {
-    console.log("update_combo");
+    //Combo started.
+    if(emote.timer == null) {
+	emote.combo = 1;
+	emote.users = [username];
+	emote.timer = start_timer(emote);
+    }
+    //Combo continuing
+    else {
+	emote.combo++;
+	emote.users.push(username);
 
-    if(current_emote === emote.code) { //Combo still going.
-	current_combo++;
-	current_users.push(username);
-
-	//Combo target hit! Show face, play audio, and then reset.
-	if(current_combo == 10) {
+	//Combo achieved! Show face, play audio, and reset emote combo.
+	if(emote.combo == 7) {
 	    show_emote(emote);
-	    reset_combo();
+	    reset_combo(emote);
 	}
     }
-    else { //New combo started
-	clearTimeout(timer);
-	current_emote = emote.code;
-	current_combo = 1;
-	current_users = [username];
-	start_timer();
-    }
+
+    console.log("emote: " + emote.code);
+    console.log("combo: " + emote.combo);
+    console.log("users: " + emote.users);
 }
 
 
@@ -109,7 +107,7 @@ function contains_target_emote(message, username) {
     for(i = 0; i < words.length ; i++) {
 	for(j = 0; j < emotes.length ; j++) {
 	    if (emotes[j].code === words[i]) {
-		if(current_users.indexOf(username) == -1) {
+		if(emotes[j].users.indexOf(username) == -1) {
 		    update_combo(emotes[j], username);
 		}
 		return;

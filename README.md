@@ -13,10 +13,11 @@ The emote-combo-display is a browser source addon for OBS that will show an emot
 * After you set up the directories, you will need to create a settings.js file and place it in the main project directory. This will contain all of the information needed to connect to chat and what emotes the bot is tracking. The format for settings.js is in its own section down below.
 
 
-### Adding the addon to OBS
+### Adding to OBS
 * Once the files are set up it's time to add the emote-combo-display to OBS.
 * Start by adding a browser source to your scene in OBS.
 * Check off the option for "Local file" in the browser source proporties.
+* Click "Browse" and select the index.html file.
 * Make sure to set the Width and Height of the browser source to 125.
 * After that you can drag the browser wherever you want the face to display on screen.
 
@@ -28,7 +29,7 @@ Here is the format of settings.js:
 var channel = "CHANNEL YOU WANT TO CONNECT TO HERE";
 var bot_name = "YOUR IRC BOT'S TWITCH USER NAME HERE";
 var password = "oauth:YOUR TWITCH OAUTH FOR YOUR BOT HERE";
-var emotes = [{code:"EMOTECODE1", art:"./art/EMOTECODE1.jpg", audio:"./sounds/EMOTECODE1.mp3"}, {code:"EMOTECODE2", art:"./art/EMOTECODE2.jpg", audio:"./sounds/EMOTECODE2.mp3"}];
+var emotes = [new Emote("EMOTECODE1", "./art/EMOTECODE1.jpg", "./sounds/EMOTECODE1.mp3"), new Emote("EMOTECODE2", "./art/EMOTECODE2.jpg", "./sounds/EMOTECODE2.mp3")];
 ```
 
 If you don't have an oauth password for twitch you can get one [here](https://twitchapps.com/tmi/). Just sign into your bot and that website will generate your oauth password for twitch IRC.
