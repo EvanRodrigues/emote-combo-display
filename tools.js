@@ -30,7 +30,7 @@ function start_cooldown() {
     cooldown_active = true;
     setTimeout(function() {
 	cooldown_active = false;
-    }, 30000);
+    }, cooldown);
 }
 
 
@@ -53,7 +53,7 @@ function show_emote(emote) {
 function hide_emote() {
     setTimeout(function(){
 	$('#emote').fadeOut(500);
-    }, 5000);
+    }, display_time);
 }
 
 
@@ -65,7 +65,7 @@ function start_timer(emote) {
  	console.log(emote.code + " timer stopped");
 	timer_started = false;
 	reset_combo(emote);
-    }, 35000);
+    }, combo_time_window);
 }
 
 
@@ -85,7 +85,7 @@ function update_combo(emote, username) {
 	emote.users.push(username);
 
 	//Combo achieved! Show face, play audio, and reset emote combo.
-	if(emote.combo == 7) {
+	if(emote.combo == target_combo) {
 	    show_emote(emote);
 	    reset_combo(emote);
 	}
