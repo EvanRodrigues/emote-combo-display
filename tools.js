@@ -16,9 +16,17 @@ function reset_combo(emote) {
  * Input: The path to the audio file.
  */
 function play_audio(audio_file) {
-    var audio = new Audio(audio_file);
-    audio.volume = 1;
-    audio.play();
+    var audio = document.createElement("audio");
+    audio.src = audio_file;
+    audio.onloadedmetadata = function () {
+	var duration = Math.floor(audio.duration * 1000);
+
+	audio.volume = 1;
+	audio.play();
+
+	hide_emote(duration);
+	start_cooldown();
+    }
 }
 
 
@@ -35,22 +43,30 @@ function start_cooldown() {
 
 
 /*
+ * Picks a file from an array of song file paths to play.
+ */
+function pick_audio(audio_list) {
+    audio_length = audio_list.length;
+    var random_index = Math.floor(Math.random() * audio_length);
+    return audio_list[random_index];
+}
+
+
+/*
  * Displays the emote and plays audio.
  * After sound is played, emote gets removed from display.
  */
 function show_emote(emote) {
     $('#emote').attr('src', emote.art);
     $('#emote').fadeIn(500);
-    play_audio(emote.audio);
-    hide_emote();
-    start_cooldown();
+    play_audio(pick_audio(emote.audio));
 }
 
 
 /*
  * Fades emote out of display after 5 seconds.
  */
-function hide_emote() {
+function hide_emote(display_time) {
     setTimeout(function(){
 	$('#emote').fadeOut(500);
     }, display_time);
