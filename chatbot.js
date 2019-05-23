@@ -31,19 +31,19 @@ chatClient.prototype.onError = function onError(message){
 chatClient.prototype.onMessage = function onMessage(message){
     var socket = this.webSocket;
 
-    if(message !== null){
-	var parsed = this.parseMessage(message.data);
-	var parsed_username = parsed.username;
-	var parsed_message = parsed.message;
+    if(message !== null) {
+	    var parsed = this.parseMessage(message.data);
+	    var parsed_username = parsed.username;
+	    var parsed_message = parsed.message;
 
-	if(parsed != null){
-	    if(parsed.command === "PING") {
+	    if(parsed != null) {
+	        if(parsed.command === "PING") {
                 this.webSocket.send("PONG :" + parsed.message);
-	    }
+	        }
 
-	    if(parsed_message != null) {
-		contains_target_emote(parsed_message, parsed_username);
-	    }
+	        if(parsed_message != null) {
+		        contains_target_emote(parsed_message, parsed_username);
+	        }
         }
     }
 };
@@ -103,7 +103,8 @@ chatClient.prototype.parseMessage = function parseMessage(rawMessage) {
         parsedMessage.command = rawMessage.slice(userIndex + 1, commandIndex);
         parsedMessage.channel = rawMessage.slice(commandIndex + 1, channelIndex);
         parsedMessage.message = rawMessage.slice(messageIndex + 1).replace("\r\n", "");
-    } else if(rawMessage.startsWith("PING")) {
+    } 
+    else if(rawMessage.startsWith("PING")) {
         parsedMessage.command = "PING";
         parsedMessage.message = rawMessage.split(":")[1];
     }

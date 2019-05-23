@@ -1,6 +1,5 @@
 var cooldown_active = false;
 
-
 /*
  * Resets the combo to default values.
  */
@@ -19,13 +18,13 @@ function play_audio(audio_file) {
     var audio = document.createElement("audio");
     audio.src = audio_file;
     audio.onloadedmetadata = function () {
-	var duration = Math.floor(audio.duration * 1000);
+	    var duration = Math.floor(audio.duration * 1000);
 
-	audio.volume = 1;
-	audio.play();
+	    audio.volume = 1;
+	    audio.play();
 
-	hide_emote(duration);
-	start_cooldown();
+	    hide_emote(duration);
+	    start_cooldown();
     }
 }
 
@@ -56,8 +55,8 @@ function pick_audio(audio_list) {
  * Displays the emote and plays audio.
  * After sound is played, emote gets removed from display.
  */
-function show_emote(emote) {
-    $('#emote').attr('src', emote.art);
+function show_emote(emote, code_index) {
+    $('#emote').attr('src', emote.art[code_index]);
     $('#emote').fadeIn(500);
     play_audio(pick_audio(emote.audio));
 }
@@ -77,10 +76,10 @@ function hide_emote(display_time) {
  * Starts the timing window for the current emote to be combo'd.
  */
 function start_timer(emote) {
-    return setTimeout(function(){
- 	console.log(emote.code + " timer stopped");
-	timer_started = false;
-	reset_combo(emote);
+    return setTimeout(function() {
+ 	    console.log(emote.codes + " timer stopped");
+	    timer_started = false;
+	    reset_combo(emote);
     }, combo_time_window);
 }
 
@@ -88,28 +87,42 @@ function start_timer(emote) {
 /*
  * Updates the global variables that keep track of the emote combo.
  */
-function update_combo(emote, username) {
+function update_combo(emote, username, code_index) {
     //Combo started.
     if(emote.timer == null) {
-	emote.combo = 1;
-	emote.users = [username];
-	emote.timer = start_timer(emote);
+	    emote.combo = 1;
+	    emote.users = [username];
+	    emote.timer = start_timer(emote);
     }
     //Combo continuing
     else {
-	emote.combo++;
-	emote.users.push(username);
+	    emote.combo++;
+	    emote.users.push(username);
 
-	//Combo achieved! Show face, play audio, and reset emote combo.
-	if(emote.combo == target_combo) {
-	    show_emote(emote);
-	    reset_combo(emote);
-	}
+	    //Combo achieved! Show face, play audio, and reset emote combo.
+	    if(emote.combo == target_combo) {
+	        show_emote(emote, code_index);
+	        reset_combo(emote);
+	    }
     }
 
-    console.log("emote: " + emote.code);
+    console.log("emote: " + emote.codes);
     console.log("combo: " + emote.combo);
     console.log("users: " + emote.users);
+}
+
+
+/*
+ * Parses through the emote.codes array to see if the word matches an emote code.
+ */
+function word_in_codes(word, codes) { 
+    for(count = 0 ; count < codes.length ; count++) {
+        if (word === codes[count]) {
+            return count;
+        }
+    }
+    
+    return -1;
 }
 
 
@@ -121,13 +134,15 @@ function contains_target_emote(message, username) {
 
     var words = message.split(' ');
     for(i = 0; i < words.length ; i++) {
-	for(j = 0; j < emotes.length ; j++) {
-	    if (emotes[j].code === words[i]) {
-		if(emotes[j].users.indexOf(username) == -1) {
-		    update_combo(emotes[j], username);
-		}
-		return;
+	    for(j = 0; j < emotes.length ; j++) {
+            var code_index = word_in_codes(words[i], emotes[j].codes);
+
+            if (code_index != -1) {
+                if(emotes[j].users.indexOf(username) == -1) {
+		            update_combo(emotes[j], username, code_index);
+		        }
+		        return;
+	        }
 	    }
-	}
     }
 }

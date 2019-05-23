@@ -1,5 +1,5 @@
-var Emote = function Emote(code, art, audio){
-    this.code = code;
+var Emote = function Emote(codes, art, audio){
+    this.codes = codes;
     this.art = art;
     this.audio = audio;
     this.combo = 0;
