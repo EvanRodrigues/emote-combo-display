@@ -1,29 +1,31 @@
 <!doctype html>
 <html>
+
 <head>
-    <title>Emote Combos</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+  <title>Emote Combos</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <div class="emote_container">
-      <img id="emote" src="">
-    </div>
+  <div class="emote_container">
+    <img id="emote" src="">
+  </div>
 
-    <script src="chatbot.js"></script>
-    <script src="tools.js"></script>
-    <script src="Emote.js"></script>
-    <script src="settings.js"></script>
-    <script src="emote_list.js"></script>
-    <script>
-      window.chatClient = new chatClient({
-          channel: "#" + channel,
-          username: bot_name,
-          password: password
-      });
+  <script src="chatbot.js"></script>
+  <script src="Emote.js"></script>
+  <script src="settings.js"></script>
+  <script src="tools.js"></script>
+  <script src="emote_list.js"></script>
+  <script>
+    window.chatClient = new chatClient({
+      channel: "#" + channel,
+      username: bot_name,
+      password: password
+    });
 
-      window.chatClient.open();
-    </script>
+    window.chatClient.open();
+  </script>
 </body>
+
 </html>
