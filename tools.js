@@ -1,6 +1,7 @@
 var cooldown_active = false;
 
 //Initialize emotes
+let all_emotes = new Array();
 let ffz_emotes, ffz_global, bttv_emotes, bttv_global;
 GetFfzEmotes(channel);
 GetBttvEmotes(channel);
@@ -20,14 +21,14 @@ async function GetBttvEmotes(channel) {
         .then(response => response.json())
         .then(json => {
             const emotes = json["emotes"];
-            bttv_emotes = emotes.map(emote => new NewEmote(emote["code"], BttvEmoteURL(emote["id"])));
+            bttv_emotes = emotes.map(emote => new Emote(emote["code"], BttvEmoteURL(emote["id"])));
         });
 
     fetch(global_url)
         .then(response => response.json())
         .then(json => {
             const emotes = json["emotes"];
-            bttv_global = emotes.map(emote => new NewEmote(emote["code"], BttvEmoteURL(emote["id"])));
+            bttv_global = emotes.map(emote => new Emote(emote["code"], BttvEmoteURL(emote["id"])));
         });
 }
 
@@ -47,7 +48,7 @@ function GetFfzEmotes(channel) {
         .then(json => {
             const id = json["room"]["_id"];
             const emotes = json["sets"][id]["emoticons"];
-            ffz_emotes = emotes.map(emote => new NewEmote(emote["name"], GetResolution(emote)));
+            ffz_emotes = emotes.map(emote => new Emote(emote["name"], GetResolution(emote)));
         });
 
     fetch(global_url)
@@ -55,7 +56,7 @@ function GetFfzEmotes(channel) {
         .then(json => {
             const set_id = json["default_sets"][0];
             const emotes = json["sets"][set_id]["emoticons"];
-            ffz_global = emotes.map(emote => new NewEmote(emote["name"], GetResolution(emote)));
+            ffz_global = emotes.map(emote => new Emote(emote["name"], GetResolution(emote)));
         });
 }
 
@@ -75,6 +76,7 @@ function reset_combo(emote) {
  */
 function play_audio(audio_file) {
     var audio = document.createElement("audio");
+
     audio.src = audio_file;
     audio.onloadedmetadata = function () {
         var duration = Math.floor(audio.duration * 1000);
@@ -112,7 +114,10 @@ function pick_audio(audio_list) {
  * After sound is played, emote gets removed from display.
  */
 function show_emote(emote, code_index) {
-    $("#emote").attr("src", emote.art[code_index]);
+    const target_emote = all_emotes.filter(e => e.code == emote.codes[code_index]);
+    $("#emote").attr("src", "https:" + target_emote[0].art);
+
+    //$("#emote").attr("src", emote.art[code_index]);
     $("#emote").fadeIn(500);
     play_audio(pick_audio(emote.audio));
 }
@@ -178,11 +183,15 @@ function word_in_codes(word, codes) {
 }
 
 /*
- * Finds the first occurence of any target emote.
+ * Finds the first occurrence of any target emote.
  */
 function contains_target_emote(message, username) {
     if (cooldown_active == true) {
         return;
+    }
+
+    if (all_emotes.length == 0) { //combine every emote list
+        all_emotes = ffz_emotes.concat(ffz_global, bttv_emotes, bttv_global);
     }
 
     var words = message.split(" ");
