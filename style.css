@@ -1,5 +1,4 @@
 #emote {
     display: none;
-    width: 125px;
-    height: 125px;
+    min-width: 125px;
 }
