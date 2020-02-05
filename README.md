@@ -64,3 +64,5 @@ You can use the bttv and ffz emotes that you added to your channel. You can also
 * Any time you update your emote list, make sure to click "Refresh cache of current page" in the settings of your browser source on OBS.
 
 * If you don't have an oauth password for twitch you can get one [here](https://twitchapps.com/tmi/). Just sign into your bot's twitch account and that website will generate your oauth password for twitch IRC.
+
+* Credit to [twitchemotes.com](https://twitchemotes.com) for the api to get twitch's global emotes.

@@ -1,4 +1,4 @@
-var Emote = function Emote(codes, art, audio) {
+var Emote = function Emote(codes, art) {
     this.codes = codes;
     this.art = art;
 }
