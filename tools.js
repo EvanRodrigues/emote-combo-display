@@ -114,11 +114,7 @@ function pick_audio(audio_list) {
  * After sound is played, emote gets removed from display.
  */
 function show_emote(emote, code_index) {
-    console.log(all_emotes[2]);
     const target_emote = all_emotes.filter(e => e.codes == emote.codes[code_index]);
-    console.log(target_emote);
-
-
     $("#emote").attr("src", "https:" + target_emote[0].art);
 
     //$("#emote").attr("src", emote.art[code_index]);
