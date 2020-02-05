@@ -46,7 +46,7 @@ function GetFfzEmotes(channel) {
     fetch(url)
         .then(response => response.json())
         .then(json => {
-            const id = json["room"]["_id"];
+            const id = json["room"]["set"];
             const emotes = json["sets"][id]["emoticons"];
             ffz_emotes = emotes.map(emote => new Emote(emote["name"], GetResolution(emote)));
         });
@@ -114,7 +114,11 @@ function pick_audio(audio_list) {
  * After sound is played, emote gets removed from display.
  */
 function show_emote(emote, code_index) {
-    const target_emote = all_emotes.filter(e => e.code == emote.codes[code_index]);
+    console.log(all_emotes[2]);
+    const target_emote = all_emotes.filter(e => e.codes == emote.codes[code_index]);
+    console.log(target_emote);
+
+
     $("#emote").attr("src", "https:" + target_emote[0].art);
 
     //$("#emote").attr("src", emote.art[code_index]);
