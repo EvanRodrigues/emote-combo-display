@@ -2,9 +2,31 @@ var cooldown_active = false;
 
 //Initialize emotes
 let all_emotes = new Array();
-let ffz_emotes, ffz_global, bttv_emotes, bttv_global;
+let twitch_global, ffz_emotes, ffz_global, bttv_emotes, bttv_global;
+GetTwitchGlobal();
 GetFfzEmotes(channel);
 GetBttvEmotes(channel);
+
+
+function TwitchEmoteUrl(id) {
+    return "//static-cdn.jtvnw.net/emoticons/v1/" + id + "/3.0";
+}
+
+function emoteRegex(code, expression) {
+    const regex = RegExp(expression);
+    return regex.test(code);
+}
+
+function GetTwitchGlobal() {
+    const url = "https://api.twitchemotes.com/api/v4/channels/0"; //Credit to twitchemotes.com
+
+    fetch(url)
+        .then(response => response.json())
+        .then(json => {
+            const emotes = json["emotes"];
+            twitch_global = emotes.map(e => new Emote(e["code"], TwitchEmoteUrl(e["id"])));
+        });
+}
 
 
 //BTTV format for image and gif urls
@@ -114,7 +136,7 @@ function pick_audio(audio_list) {
  * After sound is played, emote gets removed from display.
  */
 function show_emote(emote, code_index) {
-    const target_emote = all_emotes.filter(e => e.codes == emote.codes[code_index]);
+    const target_emote = all_emotes.filter(e => e.codes == emote.codes[code_index] || emoteRegex(emote.codes[code_index], e.codes));
     $("#emote").attr("src", "https:" + target_emote[0].art);
 
     //$("#emote").attr("src", emote.art[code_index]);
@@ -191,7 +213,7 @@ function contains_target_emote(message, username) {
     }
 
     if (all_emotes.length == 0) { //combine every emote list
-        all_emotes = ffz_emotes.concat(ffz_global, bttv_emotes, bttv_global);
+        all_emotes = twitch_global.concat(ffz_emotes, ffz_global, bttv_emotes, bttv_global);
     }
 
     var words = message.split(" ");
