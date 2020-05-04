@@ -4,9 +4,15 @@ var cooldown_active = false;
  * Initialize emotes
  */
 let all_emotes = new Array();
-let userId, twitch_global, ffz_emotes, ffz_global, bttv_emotes, bttv_global;
+let userId,
+    twitch_global,
+    twitch_subscriber,
+    ffz_emotes,
+    ffz_global,
+    bttv_emotes,
+    bttv_global;
 getUserId();
-GetTwitchGlobal();
+getTwitchEmotes(0); //Global emotes id = 0
 GetFfzEmotes(channel);
 
 /*
@@ -26,6 +32,7 @@ function getUserId() {
         .then((json) => {
             userId = json["user_id"];
             GetBttvEmotes(userId);
+            getTwitchEmotes(userId);
         });
 }
 
@@ -42,16 +49,23 @@ function emoteRegex(code, expression) {
     return regex.test(code);
 }
 
-function GetTwitchGlobal() {
-    const url = "https://api.twitchemotes.com/api/v4/channels/0"; //Credit to twitchemotes.com
+function getTwitchEmotes(channelId) {
+    const url = `https://api.twitchemotes.com/api/v4/channels/${channelId}`; //Credit to twitchemotes.com
 
     fetch(url)
         .then((response) => response.json())
         .then((json) => {
             const emotes = json["emotes"];
-            twitch_global = emotes.map(
-                (e) => new Emote(e["code"], TwitchEmoteUrl(e["id"]))
-            );
+
+            if (channelId == 0) {
+                twitch_global = emotes.map(
+                    (e) => new Emote(e["code"], TwitchEmoteUrl(e["id"]))
+                );
+            } else {
+                twitch_subscriber = emotes.map(
+                    (e) => new Emote(e["code"], TwitchEmoteUrl(e["id"]))
+                );
+            }
         });
 }
 
@@ -260,6 +274,7 @@ function contains_target_emote(message, username) {
     if (all_emotes.length == 0) {
         //combine every emote list
         all_emotes = twitch_global.concat(
+            twitch_subscriber,
             ffz_emotes,
             ffz_global,
             bttv_emotes,
