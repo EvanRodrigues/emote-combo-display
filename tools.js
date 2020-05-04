@@ -1,13 +1,45 @@
 var cooldown_active = false;
 
-//Initialize emotes
+/*
+ * Initialize emotes
+ */
 let all_emotes = new Array();
-let twitch_global, ffz_emotes, ffz_global, bttv_emotes, bttv_global;
-GetTwitchGlobal();
+let userId,
+    twitch_global,
+    twitch_subscriber,
+    ffz_emotes,
+    ffz_global,
+    bttv_emotes,
+    bttv_global;
+getUserId();
+getTwitchEmotes(0); //Global emotes id = 0
 GetFfzEmotes(channel);
-GetBttvEmotes(channel);
 
+/*
+ * Get the user id from twitch
+ * v3 of the bttv api requires a channel id instead of the channel name.
+ */
+function getUserId() {
+    const url = `https://id.twitch.tv/oauth2/validate`;
+    const oauthPassword = password.split(":")[1]; //gets oauth pw from global password
 
+    fetch(url, {
+        headers: {
+            Authorization: `OAuth ${oauthPassword}`,
+        },
+    })
+        .then((response) => response.json())
+        .then((json) => {
+            userId = json["user_id"];
+            GetBttvEmotes(userId);
+            getTwitchEmotes(userId);
+        });
+}
+
+/*
+ * Gets the twitch emote img from twitch api.
+ * Input: id of twitch emote.
+ */
 function TwitchEmoteUrl(id) {
     return "//static-cdn.jtvnw.net/emoticons/v1/" + id + "/3.0";
 }
@@ -17,44 +49,64 @@ function emoteRegex(code, expression) {
     return regex.test(code);
 }
 
-function GetTwitchGlobal() {
-    const url = "https://api.twitchemotes.com/api/v4/channels/0"; //Credit to twitchemotes.com
+function getTwitchEmotes(channelId) {
+    const url = `https://api.twitchemotes.com/api/v4/channels/${channelId}`; //Credit to twitchemotes.com
 
     fetch(url)
-        .then(response => response.json())
-        .then(json => {
+        .then((response) => response.json())
+        .then((json) => {
             const emotes = json["emotes"];
-            twitch_global = emotes.map(e => new Emote(e["code"], TwitchEmoteUrl(e["id"])));
+
+            if (channelId == 0) {
+                twitch_global = emotes.map(
+                    (e) => new Emote(e["code"], TwitchEmoteUrl(e["id"]))
+                );
+            } else {
+                twitch_subscriber = emotes.map(
+                    (e) => new Emote(e["code"], TwitchEmoteUrl(e["id"]))
+                );
+            }
         });
 }
 
-
-//BTTV format for image and gif urls
+/*
+ * BTTV format for image and gif urls
+ */
 function BttvEmoteURL(id) {
     return "cdn.betterttv.net/emote/" + id + "/3x";
 }
 
-//Get id then get emote
-async function GetBttvEmotes(channel) {
-    const url = "https://api.betterttv.net/2/channels/" + channel;
-    const global_url = "https://api.betterttv.net/2/emotes";
+/*
+ * Get id then get emote
+ */
+async function GetBttvEmotes(userId) {
+    const url = `https://api.betterttv.net/3/cached/users/twitch/${userId}`;
+    const global_url = "https://api.betterttv.net/3/cached/emotes/global";
 
     fetch(url)
-        .then(response => response.json())
-        .then(json => {
-            const emotes = json["emotes"];
-            bttv_emotes = emotes.map(emote => new Emote(emote["code"], BttvEmoteURL(emote["id"])));
+        .then((response) => response.json())
+        .then((json) => {
+            const channelEmotes = json["channelEmotes"];
+            const sharedEmotes = json["sharedEmotes"];
+            const emotes = channelEmotes.concat(sharedEmotes);
+
+            bttv_emotes = emotes.map(
+                (emote) => new Emote(emote["code"], BttvEmoteURL(emote["id"]))
+            );
         });
 
     fetch(global_url)
-        .then(response => response.json())
-        .then(json => {
-            const emotes = json["emotes"];
-            bttv_global = emotes.map(emote => new Emote(emote["code"], BttvEmoteURL(emote["id"])));
+        .then((response) => response.json())
+        .then((json) => {
+            bttv_global = json.map(
+                (emote) => new Emote(emote["code"], BttvEmoteURL(emote["id"]))
+            );
         });
 }
 
-//Gets highest resolution available url for each ffz emote.
+/*
+ * Gets highest resolution available url for each ffz emote.
+ */
 function GetResolution(emote) {
     if (emote["urls"][4] != null) return emote["urls"][4];
     else if (emote["urls"][2] != null) return emote["urls"][2];
@@ -66,22 +118,25 @@ function GetFfzEmotes(channel) {
     const global_url = "https://api.frankerfacez.com/v1/set/global";
 
     fetch(url)
-        .then(response => response.json())
-        .then(json => {
+        .then((response) => response.json())
+        .then((json) => {
             const id = json["room"]["set"];
             const emotes = json["sets"][id]["emoticons"];
-            ffz_emotes = emotes.map(emote => new Emote(emote["name"], GetResolution(emote)));
+            ffz_emotes = emotes.map(
+                (emote) => new Emote(emote["name"], GetResolution(emote))
+            );
         });
 
     fetch(global_url)
-        .then(response => response.json())
-        .then(json => {
+        .then((response) => response.json())
+        .then((json) => {
             const set_id = json["default_sets"][0];
             const emotes = json["sets"][set_id]["emoticons"];
-            ffz_global = emotes.map(emote => new Emote(emote["name"], GetResolution(emote)));
+            ffz_global = emotes.map(
+                (emote) => new Emote(emote["name"], GetResolution(emote))
+            );
         });
 }
-
 
 /*
  * Resets the combo to default values.
@@ -136,7 +191,11 @@ function pick_audio(audio_list) {
  * After sound is played, emote gets removed from display.
  */
 function show_emote(emote, code_index) {
-    const target_emote = all_emotes.filter(e => e.codes == emote.codes[code_index] || emoteRegex(emote.codes[code_index], e.codes));
+    const target_emote = all_emotes.filter(
+        (e) =>
+            e.codes == emote.codes[code_index] ||
+            emoteRegex(emote.codes[code_index], e.codes)
+    );
     $("#emote").attr("src", "https:" + target_emote[0].art);
 
     //$("#emote").attr("src", emote.art[code_index]);
@@ -212,8 +271,15 @@ function contains_target_emote(message, username) {
         return;
     }
 
-    if (all_emotes.length == 0) { //combine every emote list
-        all_emotes = twitch_global.concat(ffz_emotes, ffz_global, bttv_emotes, bttv_global);
+    if (all_emotes.length == 0) {
+        //combine every emote list
+        all_emotes = twitch_global.concat(
+            twitch_subscriber,
+            ffz_emotes,
+            ffz_global,
+            bttv_emotes,
+            bttv_global
+        );
     }
 
     var words = message.split(" ");
